@@ -1,0 +1,169 @@
+#!/usr/bin/python
+
+from sys import exit
+
+prompt = "> "
+keys = False
+lockpick = False
+gaurdsuit = False
+
+def mess_hall(keys, lockpick, gaurdsuit):
+    print "You have entered the mess hall."
+    if not gaurdsuit:
+        print "There are several gaurds sitting at tables with wonderful smelling food."
+    print "What do you do?"
+
+    choice = raw_input(prompt)
+
+    if ("eat" or "sit") in choice and not gaurdsuit:
+        dead("The gaurds see you are a prisoner and shoot you.")
+    elif ("eat" or "sit") in choice and gaurdsuit:
+        print "You sit down and enjoy a nice meal."
+        print "You are now full and exit the mess hall."
+        locker_room(keys, lockpick, gaurdsuit)
+    elif "exit" in choice or "west" in choice:
+        locker_room(keys, lockpick, gaurdsuit)
+    else:
+        dead("Just standing around like a moron, a guard reconizes you and shoots you.")
+
+def wardens_office(keys, lockpick, gaurdsuit):
+    print "You have entered the Warden's Office."
+    print "There is a nice table on a rug in the center of the room."
+    print "On the table are a few items."
+    print "What do you do?"
+    rug_moved = False
+
+    while True:
+        choice = raw_input(prompt)
+
+        if "inspect" in choice and not rug_moved and not lockpick:
+            print "You see a lot of junk, but there is a small metal file and a note with 3:7:11 written on it."
+        elif "file" in choice:
+            print "You have aquired a lockpick."
+            lockpick = True
+        elif "inspect" in choice and not rug_moved and lockpick:
+            print "You see a lot of junk."
+        elif "move" in choice and not rug_moved:
+            print "You slide the rug away reveiling a trap door."
+            print "What should you do?"
+            rug_moved = True
+        elif "move" in choice and rug_moved:
+            print "You have recoved the trap door."
+            rug_moved = False
+        elif choice == "open trapdoor" and not rug_moved:
+            print "What trapdoor?"
+        elif choice == "open trapdoor" and rug_moved and not keys:
+            print "Oh no. The trap door is locked."
+        elif choice == "open trapdoor" and rug_moved and keys:
+            print "You have found a secret tunnel out of the Warden's office."
+            print "Congratulations! You have escaped!"
+            exit(0)
+        elif choice == "exit" or choice == "back" or "north" in choice:
+            start(keys, lockpick, gaurdsuit)
+        elif "pick" in choice:
+            print "There is not a lock in this room you can pick."
+        elif choice == "inventory":
+            check_inventory(keys, lockpick, guardsuit)
+        else:
+            print "I don't understand."
+
+def start(keys, lockpick, gaurdsuit):
+    print "You are just outside your jail cell in a dark room."
+    print "There is a door to the south and a door to the east."
+    print "What do you want to do?"
+
+    choice = raw_input(prompt)
+
+    if "south" in choice:
+        wardens_office(keys, lockpick, gaurdsuit)
+    elif "east" in choice:
+        locker_room(keys, lockpick, gaurdsuit)
+    else:
+        dead("You stood around and a guard shot you.")
+
+def locker_room(keys, lockpick, gaurdsuit):
+    print "You have entered what appears to be the gaurds locker room."
+    print "There are doors on the east, west and south walls."
+    print "There is a locker on the north wall."
+    unlocked_locker = False
+    unlocked_south_door = False
+    jail_map = False
+
+    while True:
+        choice = raw_input(prompt)
+
+        if "east" in choice:
+            mess_hall(keys, lockpick, gaurdsuit)
+        elif "west" in choice:
+            start(keys, lockpick, gaurdsuit)
+        elif "south" in choice and unlocked_south_door:
+            visitation_room(keys, lockpick, gaurdsuit)
+        elif "south" in choice and not unlocked_south_door:
+            print "The south door is locked."
+            print "There doesn't seem to be a key for it."
+        elif choice == "pick door lock":
+            print "After messing with the lock on the south door, you have successfully picked it."
+            unlocked_south_door = True
+        elif choice == "open locker" and lockpick:
+            print "You used your lock picking tools to open the locker."
+            print "Inside you find a gaurd's uniform.  You put it on."
+            print "In the pocket of the jacket you find a map of the prison."
+            gaurdsuit = True
+            jail_map = True
+        elif choice == "open locker 3:7:11":
+            print "You used the combination and opened the locker."
+            print "Inside you find a gaurd's uniform and put it on."
+            print "You also happen to see a key of some kind hidden under a sock."
+            gaurdsuit = True
+            keys = True
+        elif choice == "show map" and jail_map:
+            show_map()
+        else:
+            print "I don't understand."
+
+def visitation_room(keys, lockpick, gaurdsuit):
+    print "You have made it to the visitation room!"
+    print "As you scan the room you can see an exit on the other side."
+    if not gaurdsuit:
+        print "Unfortunately there are multiple guards in this room."
+    print "What are you going to do?"
+
+    choice = raw_input(prompt)
+
+    if "south" in choice and not gaurdsuit:
+        dead("The gaurds see you trying to escape. They shoot you dead.")
+    elif "south" in choice and gaurdsuit:
+        print "You casually stroll out of the south exit."
+        print "Thanks to your spiffy gaurd suit, no one notices."
+        print "Congratulations.  You escaped this crazy place!"
+        exit(0)
+    elif choice == "visit" and gaurdsuit:
+        dead("The gaurd's uniform you are wearing angers a fellow prisoner.  You get shived.")
+    elif choice == "visit" and not gaurdsuit:
+        print "You sit down and have a nice long chat with a cute secretary."
+        print "She is waiting for her brother, but he never shows up."
+        print "You get her phone number."
+    else:
+        dead("Just standing in the doorway you feel a knife in your skull. Your bunkmate was tired of your snoring.")
+
+def show_map():
+    print """
+
+
+    ###############################################
+    #               #              #              #
+    #      start    |    Lockers   |   Mess Hall  #
+    #               #              #              #
+    ########---############---############---######
+    #               #              #
+    #     Warden    #  Visitation  #
+    #               #              #
+    #######################___######
+
+
+    """
+def dead(msg):
+    print msg
+    exit(0)
+
+start(keys, lockpick, gaurdsuit)
